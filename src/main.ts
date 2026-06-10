@@ -30,12 +30,24 @@ export default class MatrixGellmanPlugin extends Plugin {
     }
 
     this.registerView(VIEW_TYPE, leaf => new MatrixView(leaf, this));
-    this.addRibbonIcon("layout-grid", "MatrixGellman", () => this.activateView());
+
+    // Ribbon: always loads whatever file is currently active
+    this.addRibbonIcon("layout-grid", "MatrixGellman", async () => {
+      const f = this.app.workspace.getActiveFile();
+      if (f) await this.readFile(f.path);
+      await this.activateView();
+      this.refreshViews();
+    });
 
     this.addCommand({
       id: "matrix-gellman-open",
       name: "Open MatrixGellman",
-      callback: () => this.activateView(),
+      callback: async () => {
+        const f = this.app.workspace.getActiveFile();
+        if (f) await this.readFile(f.path);
+        await this.activateView();
+        this.refreshViews();
+      },
     });
     this.addCommand({
       id: "matrix-gellman-track",
@@ -134,10 +146,12 @@ class MatrixView extends ItemView {
     this.styleEl = document.createElement("style");
     this.styleEl.textContent = CSS;
     document.head.appendChild(this.styleEl);
-    // Try active file if nothing loaded
-    if (!this.plugin.parsed) {
-      const f = this.plugin.app.workspace.getActiveFile();
-      if (f) await this.plugin.readFile(f.path);
+    // Always prefer the file the user is currently looking at
+    const active = this.plugin.app.workspace.getActiveFile();
+    if (active && active.path !== this.plugin.settings.lastFilePath) {
+      await this.plugin.readFile(active.path);
+    } else if (!this.plugin.parsed && active) {
+      await this.plugin.readFile(active.path);
     }
     this.render();
   }
