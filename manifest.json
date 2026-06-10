@@ -1,0 +1,10 @@
+{
+  "id": "matrix-gellman",
+  "name": "MatrixGellman",
+  "version": "1.0.0",
+  "minAppVersion": "1.0.0",
+  "description": "Track any project tree with weekly status and notes. Reads from any .md file. Add ::Main ::Start MM-YY ::End MM-YY to configure the date range.",
+  "author": "Gellman Vault",
+  "authorUrl": "",
+  "isDesktopOnly": false
+}
